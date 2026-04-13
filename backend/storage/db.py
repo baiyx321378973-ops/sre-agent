@@ -9,6 +9,7 @@ DB_PATH = Path(os.getenv("SRE_AGENT_DB_PATH", BASE_DIR / "sre_agent.db"))
 
 #连接数据库
 def get_conn():
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
