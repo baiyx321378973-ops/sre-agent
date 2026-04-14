@@ -3,10 +3,10 @@ import uuid
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 
-from backend.api.routes_internal import router as internal_router
+from backend.api.routes_internal import prometheus_metrics, router as internal_router
 from backend.storage.db import init_db
 from backend.storage.seed import seed_data
 from backend.api.routes_services import router as services_router
@@ -116,6 +116,11 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
 @app.get("/")
 def root():
     return FileResponse(FRONTEND_DIR / "index.html")
+
+
+@app.get("/metrics", response_class=PlainTextResponse)
+def metrics_export():
+    return prometheus_metrics()
 
 
 app.mount("/frontend", StaticFiles(directory=FRONTEND_DIR), name="frontend")

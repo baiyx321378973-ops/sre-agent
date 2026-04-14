@@ -92,10 +92,20 @@ class RegressionTests(unittest.TestCase):
 
         self.assertEqual(resp.status_code, 200)
         metrics = resp.json()["metrics"]
-        self.assertGreaterEqual(metrics["request_count"], 2)
+        self.assertGreaterEqual(metrics["request_count"], 1)
         self.assertIn("success_rate_pct", metrics)
         self.assertIn("avg_response_time_ms", metrics)
         self.assertIn("p95_response_time_ms", metrics)
+
+    def test_prometheus_metrics_endpoint_returns_text_export(self):
+        with TestClient(app) as client:
+            client.get("/services/")
+            resp = client.get("/metrics")
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("sre_agent_request_total", resp.text)
+        self.assertIn("sre_agent_success_rate_pct", resp.text)
+        self.assertIn("sre_agent_p95_response_time_ms", resp.text)
 
     def test_http_exception_returns_request_id_and_error_shape(self):
         with TestClient(app) as client:

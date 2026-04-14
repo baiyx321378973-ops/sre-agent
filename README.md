@@ -19,6 +19,7 @@ SRE Agent 是一个面向服务运维场景的 AI Copilot 项目。
   - 在缺失目标版本或服务名时进入澄清流程
 - 证据驱动故障诊断
   - 聚合 alerts、status、metrics、logs、deployment context
+  - Agent 基于 metrics / logs / alerts / K8s 运行态进行故障分析与风险评估
   - 输出风险等级、关键证据、根因候选、缺失信号和下一步动作
 - 高风险操作控制
   - deploy / rollback 支持 dry-run
@@ -36,6 +37,7 @@ SRE Agent 是一个面向服务运维场景的 AI Copilot 项目。
   - 提供统一异常返回格式
 - 内部运行指标
   - 提供成功率、错误率、平均响应时间和 P95 响应时间
+  - 支持 Prometheus 风格导出接口 `/metrics`
 - Incident replay / benchmark
   - 内置基线故障场景
   - 支持单场景回放和批量 benchmark
@@ -135,6 +137,8 @@ benchmark 用于回放固定 incident 场景，验证系统在关键路径上的
 - P95 响应时间
 - 运行时长
 
+当前还提供 Prometheus 风格指标导出，便于接入外部监控系统。
+
 
 ## 技术栈
 
@@ -232,6 +236,7 @@ sre-agent/
 项目提供内部运行指标接口：
 
 - `GET /internal/metrics`
+- `GET /metrics`
 
 返回内容包括：
 
@@ -243,6 +248,15 @@ sre-agent/
 - `avg_response_time_ms`
 - `p95_response_time_ms`
 - `uptime_seconds`
+
+Prometheus 风格导出当前包含：
+
+- `sre_agent_request_total`
+- `sre_agent_success_rate_pct`
+- `sre_agent_avg_response_time_ms`
+- `sre_agent_p95_response_time_ms`
+
+多实例场景下，指标聚合层支持扩展为 Redis / 外部存储汇总模式，用于统一收敛多个 Agent 实例的运行指标。
 
 
 ## 快速开始
@@ -455,6 +469,7 @@ payment-service 状态
 ### Internal
 
 - `GET /internal/metrics`
+- `GET /metrics`
 
 ### Settings
 
